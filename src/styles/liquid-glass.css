@@ -1,41 +1,82 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    Liquid Glass UI — surface primitives
-   The .lg-surface class is the single source of truth for the glass effect.
-   All variant and element classes compose on top of it.
+   All appearance is driven by CSS custom properties so consumers can theme
+   the glass without forking classes.
+
+   Default token values (override on :root or any ancestor):
+     --lg-radius               1.4rem
+     --lg-blur                 20px
+     --lg-tint-color           255, 255, 255   (R, G, B — no alpha)
+     --lg-tint-opacity         0.14
+     --lg-inner-shadow-blur    0px
+     --lg-inner-shadow-spread  0px
+     --lg-inner-shadow-color   rgba(255,255,255,0.45)
+     --lg-outer-shadow-blur    40px
+     --lg-specular-opacity     0.82
 ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --lg-radius: 1.4rem;
+  --lg-blur: 20px;
+  --lg-tint-color: 255, 255, 255;
+  --lg-tint-opacity: 0.14;
+  --lg-inner-shadow-blur: 0px;
+  --lg-inner-shadow-spread: 0px;
+  --lg-inner-shadow-color: rgba(255, 255, 255, 0.45);
+  --lg-outer-shadow-blur: 40px;
+  --lg-specular-opacity: 0.82;
+}
+
+@keyframes lg-emerge {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(6px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Sheen sweep — triggered only on hover via .lg-surface:hover::before */
+@keyframes lg-sheen {
+  from { background-position: -200% center, 0 0; }
+  to   { background-position:  200% center, 0 0; }
+}
 
 .lg-surface {
   position: relative;
   isolation: isolate;
 
-  /* Refraction via SVG displacement map (Chrome) + frosted blur (all) */
   backdrop-filter:
-    blur(20px)
+    blur(var(--lg-blur))
     saturate(160%)
     url(#liquid-glass-filter);
   -webkit-backdrop-filter:
-    blur(20px)
+    blur(var(--lg-blur))
     saturate(160%);
 
-  /* Glass body */
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(var(--lg-tint-color), var(--lg-tint-opacity));
 
-  /* Gradient border — top edge bright, bottom edge subtle */
   border: 1px solid transparent;
   background-clip: padding-box;
   box-shadow:
-    /* Outer ambient */ 0 8px 40px rgba(0, 0, 0, 0.12),
-    /* Specular rim   */ inset 0 1.5px 0 rgba(255, 255, 255, 0.82),
+    0 8px var(--lg-outer-shadow-blur) rgba(0, 0, 0, 0.12),
+    inset 0 1.5px 0 rgba(255, 255, 255, var(--lg-specular-opacity)),
     inset 0 -1px 0 rgba(255, 255, 255, 0.14),
     inset 1.5px 0 rgba(255, 255, 255, 0.22),
     inset -1.5px 0 rgba(255, 255, 255, 0.10),
-    /* Outer border   */ 0 0 0 1px rgba(255, 255, 255, 0.32);
+    inset 0 0 var(--lg-inner-shadow-blur) var(--lg-inner-shadow-spread) var(--lg-inner-shadow-color),
+    0 0 0 1px rgba(255, 255, 255, 0.32);
 
-  border-radius: 1.4rem;
+  border-radius: var(--lg-radius);
   overflow: hidden;
+  animation: lg-emerge 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Inner lens highlight — diagonal sheen across the surface */
+/* Lens highlight — static diagonal + hover sheen sweep */
 .lg-surface::before {
   content: '';
   position: absolute;
@@ -43,16 +84,30 @@
   z-index: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(
-    138deg,
-    rgba(255, 255, 255, 0.32) 0%,
-    rgba(255, 255, 255, 0.08) 38%,
-    rgba(255, 255, 255, 0.00) 60%,
-    rgba(255, 255, 255, 0.07) 100%
-  );
+  background:
+    linear-gradient(
+      120deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.70) 40%,
+      rgba(255, 255, 255, 0.22) 50%,
+      transparent 60%
+    ),
+    linear-gradient(
+      138deg,
+      rgba(255, 255, 255, 0.28) 0%,
+      rgba(255, 255, 255, 0.07) 38%,
+      rgba(255, 255, 255, 0.00) 60%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  background-size: 300% 100%, 100% 100%;
+  background-position: -200% center, 0 0;
 }
 
-/* Refraction edge halo */
+.lg-surface:hover::before {
+  animation: lg-sheen 0.65s ease;
+}
+
+/* Gradient border frame + cursor-following radial highlight */
 .lg-surface::after {
   content: '';
   position: absolute;
@@ -60,13 +115,19 @@
   z-index: -1;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.55) 0%,
-    rgba(255, 255, 255, 0.12) 30%,
-    rgba(255, 255, 255, 0.05) 60%,
-    rgba(255, 255, 255, 0.28) 100%
-  );
+  background:
+    radial-gradient(
+      circle 80px at var(--lg-x, 50%) var(--lg-y, 0%),
+      rgba(255, 255, 255, 0.45),
+      transparent 70%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.12) 30%,
+      rgba(255, 255, 255, 0.05) 60%,
+      rgba(255, 255, 255, 0.28) 100%
+    );
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -74,7 +135,6 @@
   padding: 1px;
 }
 
-/* Stacking context: children above pseudo-elements */
 .lg-surface > * {
   position: relative;
   z-index: 1;
@@ -91,13 +151,23 @@
 }
 
 .lg-surface-dark::before {
-  background: linear-gradient(
-    138deg,
-    rgba(255, 255, 255, 0.14) 0%,
-    rgba(255, 255, 255, 0.03) 40%,
-    rgba(255, 255, 255, 0.00) 60%,
-    rgba(255, 255, 255, 0.04) 100%
-  );
+  background:
+    linear-gradient(
+      120deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.35) 40%,
+      rgba(255, 255, 255, 0.10) 50%,
+      transparent 60%
+    ),
+    linear-gradient(
+      138deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.03) 40%,
+      rgba(255, 255, 255, 0.00) 60%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+  background-size: 300% 100%, 100% 100%;
+  background-position: -200% center, 0 0;
 }
 
 /* ── Interactive states ───────────────────────────────────────────────────── */
@@ -112,17 +182,17 @@
 }
 
 .lg-button:hover {
-  background: rgba(255, 255, 255, 0.22);
-  transform: translateY(-1.5px);
+  background: rgba(255, 255, 255, 0.26);
+  transform: translateY(-2px) scale(1.01);
   box-shadow:
-    0 16px 48px rgba(0, 0, 0, 0.16),
+    0 16px 48px rgba(0, 0, 0, 0.18),
     inset 0 2px 0 rgba(255, 255, 255, 0.92),
     inset 0 -1px 0 rgba(255, 255, 255, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.40);
+    0 0 0 1px rgba(255, 255, 255, 0.48);
 }
 
 .lg-button:active {
-  transform: scale(0.964) translateY(0px);
+  transform: scale(0.96) translateY(0px);
   background: rgba(255, 255, 255, 0.10);
   box-shadow:
     0 4px 18px rgba(0, 0, 0, 0.10),
@@ -136,6 +206,81 @@
   outline-offset: 3px;
 }
 
+/* ── CTA variant — brand-blue tinted glass ───────────────────────────────── */
+.lg-button-cta {
+  background: rgba(45, 108, 223, 0.35);
+  box-shadow:
+    0 8px var(--lg-outer-shadow-blur) rgba(45, 108, 223, 0.28),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.72),
+    inset 0 -1px 0 rgba(45, 108, 223, 0.22),
+    inset 1.5px 0 rgba(255, 255, 255, 0.18),
+    inset -1.5px 0 rgba(255, 255, 255, 0.10),
+    0 0 0 1px rgba(100, 150, 255, 0.40);
+}
+
+.lg-button-cta:hover {
+  background: rgba(45, 108, 223, 0.50);
+  box-shadow:
+    0 16px 52px rgba(45, 108, 223, 0.42),
+    inset 0 2px 0 rgba(255, 255, 255, 0.88),
+    inset 0 -1px 0 rgba(45, 108, 223, 0.28),
+    0 0 0 1px rgba(130, 175, 255, 0.58);
+}
+
+.lg-button-cta::before {
+  background:
+    linear-gradient(
+      120deg,
+      transparent 20%,
+      rgba(180, 215, 255, 0.80) 40%,
+      rgba(180, 215, 255, 0.25) 50%,
+      transparent 60%
+    ),
+    linear-gradient(
+      138deg,
+      rgba(200, 225, 255, 0.30) 0%,
+      rgba(150, 195, 255, 0.08) 38%,
+      rgba(255, 255, 255, 0.00) 60%,
+      rgba(180, 210, 255, 0.08) 100%
+    );
+  background-size: 300% 100%, 100% 100%;
+  background-position: -200% center, 0 0;
+}
+
+.lg-button-cta::after {
+  background:
+    radial-gradient(
+      circle 80px at var(--lg-x, 50%) var(--lg-y, 30%),
+      rgba(180, 210, 255, 0.52),
+      transparent 70%
+    ),
+    linear-gradient(
+      135deg,
+      rgba(180, 212, 255, 0.62) 0%,
+      rgba(100, 160, 255, 0.18) 30%,
+      rgba(60, 120, 230, 0.08) 60%,
+      rgba(150, 195, 255, 0.40) 100%
+    );
+}
+
+/* ── Modal / overlay variant ─────────────────────────────────────────────── */
+.lg-modal {
+  background: rgba(240, 244, 255, 0.82) !important;
+  backdrop-filter: blur(32px) saturate(200%) url(#liquid-glass-filter) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.22),
+    inset 0 2px 0 rgba(255, 255, 255, 0.90),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.20),
+    0 0 0 1px rgba(255, 255, 255, 0.42) !important;
+  animation: none !important;
+}
+
+.lg-modal::before {
+  background-position: -200% center, 0 0 !important;
+  animation: none !important;
+}
+
 /* ── Size variants ────────────────────────────────────────────────────────── */
 .lg-card {
   padding: 1.25rem;
@@ -145,9 +290,9 @@
 }
 
 .lg-card:is(.lg-button):hover {
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.01);
   box-shadow:
-    0 20px 56px rgba(0, 0, 0, 0.16),
+    0 20px 56px rgba(0, 0, 0, 0.18),
     inset 0 2px 0 rgba(255, 255, 255, 0.92),
     0 0 0 1px rgba(255, 255, 255, 0.42);
 }

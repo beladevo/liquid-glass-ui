@@ -1,27 +1,38 @@
-import { LIQUID_GLASS_FILTER_ID } from './utils/filter-id'
+'use client'
 
-export function LiquidGlassProvider() {
+import { useEffect, useRef } from 'react'
+import { LIQUID_GLASS_FILTER_ID } from './utils/filter-id'
+import { buildThemeVars, type LiquidGlassTheme } from './utils/theme'
+
+interface LiquidGlassProviderProps {
+  theme?: LiquidGlassTheme
+}
+
+export function LiquidGlassProvider({ theme }: LiquidGlassProviderProps) {
+  const rootRef = useRef<SVGSVGElement>(null)
+
+  useEffect(() => {
+    if (!theme || !rootRef.current) return
+    const vars = buildThemeVars(theme)
+    const target = document.documentElement
+    for (const [key, value] of Object.entries(vars)) {
+      target.style.setProperty(key, value)
+    }
+    return () => {
+      for (const key of Object.keys(vars)) {
+        target.style.removeProperty(key)
+      }
+    }
+  }, [theme])
+
   return (
     <svg
+      ref={rootRef}
       aria-hidden="true"
       focusable="false"
       style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', pointerEvents: 'none' }}
     >
       <defs>
-        {/*
-          Main refraction filter.
-          Applied via backdrop-filter: url(#liquid-glass-filter) — Chrome only.
-          Safari / Firefox receive the backdrop-filter blur fallback only.
-
-          Pipeline:
-            1. feTurbulence  — organic displacement field (low-freq, 3 octaves)
-            2. feColorMatrix — desaturate noise to pure luminance displacement
-            3. feDisplacementMap — warp backdrop using R/G channels as X/Y offset
-            4. feGaussianBlur — soften displacement artefacts
-            5. feColorMatrix (threshold) — extract high-contrast specular edge mask
-            6. feBlend (screen) — composite rim highlight over displaced image
-            7. feComposite (in) — clip result back to original element shape
-        */}
         <filter
           id={LIQUID_GLASS_FILTER_ID}
           x="-30%"
