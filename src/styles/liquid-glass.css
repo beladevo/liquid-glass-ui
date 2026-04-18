@@ -1,0 +1,179 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Liquid Glass UI — surface primitives
+   The .lg-surface class is the single source of truth for the glass effect.
+   All variant and element classes compose on top of it.
+───────────────────────────────────────────────────────────────────────────── */
+
+.lg-surface {
+  position: relative;
+  isolation: isolate;
+
+  /* Refraction via SVG displacement map (Chrome) + frosted blur (all) */
+  backdrop-filter:
+    blur(20px)
+    saturate(160%)
+    url(#liquid-glass-filter);
+  -webkit-backdrop-filter:
+    blur(20px)
+    saturate(160%);
+
+  /* Glass body */
+  background: rgba(255, 255, 255, 0.14);
+
+  /* Gradient border — top edge bright, bottom edge subtle */
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  box-shadow:
+    /* Outer ambient */ 0 8px 40px rgba(0, 0, 0, 0.12),
+    /* Specular rim   */ inset 0 1.5px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14),
+    inset 1.5px 0 rgba(255, 255, 255, 0.22),
+    inset -1.5px 0 rgba(255, 255, 255, 0.10),
+    /* Outer border   */ 0 0 0 1px rgba(255, 255, 255, 0.32);
+
+  border-radius: 1.4rem;
+  overflow: hidden;
+}
+
+/* Inner lens highlight — diagonal sheen across the surface */
+.lg-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    138deg,
+    rgba(255, 255, 255, 0.32) 0%,
+    rgba(255, 255, 255, 0.08) 38%,
+    rgba(255, 255, 255, 0.00) 60%,
+    rgba(255, 255, 255, 0.07) 100%
+  );
+}
+
+/* Refraction edge halo */
+.lg-surface::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.12) 30%,
+    rgba(255, 255, 255, 0.05) 60%,
+    rgba(255, 255, 255, 0.28) 100%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+/* Stacking context: children above pseudo-elements */
+.lg-surface > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Dark variant ─────────────────────────────────────────────────────────── */
+.lg-surface-dark {
+  background: rgba(10, 16, 32, 0.36);
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.32),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.20),
+    0 0 0 1px rgba(255, 255, 255, 0.14);
+}
+
+.lg-surface-dark::before {
+  background: linear-gradient(
+    138deg,
+    rgba(255, 255, 255, 0.14) 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    rgba(255, 255, 255, 0.00) 60%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+}
+
+/* ── Interactive states ───────────────────────────────────────────────────── */
+.lg-button {
+  cursor: pointer;
+  transition:
+    transform 90ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 120ms ease,
+    background 120ms ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lg-button:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1.5px);
+  box-shadow:
+    0 16px 48px rgba(0, 0, 0, 0.16),
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.40);
+}
+
+.lg-button:active {
+  transform: scale(0.964) translateY(0px);
+  background: rgba(255, 255, 255, 0.10);
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.24);
+  transition-duration: 60ms;
+}
+
+.lg-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.72);
+  outline-offset: 3px;
+}
+
+/* ── Size variants ────────────────────────────────────────────────────────── */
+.lg-card {
+  padding: 1.25rem;
+  transition:
+    transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 180ms ease;
+}
+
+.lg-card:is(.lg-button):hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 20px 56px rgba(0, 0, 0, 0.16),
+    inset 0 2px 0 rgba(255, 255, 255, 0.92),
+    0 0 0 1px rgba(255, 255, 255, 0.42);
+}
+
+.lg-panel {
+  padding: 1.5rem;
+}
+
+/* ── Input wrapper ────────────────────────────────────────────────────────── */
+.lg-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  height: 3rem;
+}
+
+.lg-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-size: 0.9375rem;
+}
+
+.lg-input::placeholder {
+  color: rgba(0, 0, 0, 0.32);
+}
