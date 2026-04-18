@@ -26,7 +26,7 @@ Wrap your app (or the section where you want glass effects) with `LiquidGlassPro
 
 ```tsx
 import { LiquidGlassProvider } from 'liquid-glass-ui'
-import 'liquid-glass-ui/src/styles/liquid-glass.css'
+import 'liquid-glass-ui/styles'
 
 export function App() {
   return (

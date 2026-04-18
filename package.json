@@ -3,17 +3,35 @@
   "version": "0.1.0",
   "description": "Liquid Glass design system — reusable frosted-glass UI components with SVG displacement-map refraction",
   "license": "MIT",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./styles": "./dist/styles/liquid-glass.css"
+  },
   "files": [
-    "src"
+    "dist",
+    "README.md"
   ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "pnpm build"
+  },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.0.0"
   },
   "keywords": [
