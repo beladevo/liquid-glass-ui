@@ -10,5 +10,6 @@ export default defineConfig({
   onSuccess: async () => {
     mkdirSync('dist/styles', { recursive: true })
     copyFileSync('src/styles/liquid-glass.css', 'dist/styles/liquid-glass.css')
+    copyFileSync('src/styles/liquid-glass.css.d.ts', 'dist/styles/liquid-glass.css.d.ts')
   },
 })

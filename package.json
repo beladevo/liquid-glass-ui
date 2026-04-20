@@ -1,5 +1,5 @@
 {
-  "name": "liquid-glass-ui",
+  "name": "@beladevo/liquid-glass-ui",
   "version": "0.1.0",
   "description": "Liquid Glass design system — reusable frosted-glass UI components with SVG displacement-map refraction",
   "license": "MIT",
@@ -12,7 +12,10 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
     },
-    "./styles": "./dist/styles/liquid-glass.css"
+    "./styles": {
+      "types": "./dist/styles/liquid-glass.css.d.ts",
+      "default": "./dist/styles/liquid-glass.css"
+    }
   },
   "files": [
     "dist",
