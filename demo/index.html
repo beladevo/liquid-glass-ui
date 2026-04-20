@@ -64,124 +64,115 @@
     /* ── Glass tokens ── */
     :root {
       --lg-radius: 1.4rem;
-      --lg-blur: 20px;
+      --lg-blur: 18px;
       --lg-tint-color: 255, 255, 255;
-      --lg-tint-opacity: 0.14;
-      --lg-inner-shadow-blur: 0px;
-      --lg-inner-shadow-spread: 0px;
+      --lg-tint-opacity: 0.07;
       --lg-inner-shadow-color: rgba(255,255,255,0.45);
-      --lg-outer-shadow-blur: 40px;
-      --lg-specular-opacity: 0.82;
+      --lg-inner-shadow-blur: 20px;
+      --lg-inner-shadow-spread: -5px;
+      --lg-outer-shadow-blur: 32px;
+      --lg-specular-opacity: 0.88;
     }
 
     @keyframes lg-emerge {
       from { opacity: 0; transform: scale(0.96) translateY(6px); filter: blur(2px); }
       to   { opacity: 1; transform: scale(1) translateY(0);       filter: blur(0); }
     }
-    @keyframes lg-sheen {
-      from { background-position: -200% center, 0 0; }
-      to   { background-position:  200% center, 0 0; }
-    }
 
+    /* ── Core glass surface ── */
     .lg-surface {
       position: relative;
       isolation: isolate;
-      backdrop-filter: blur(var(--lg-blur)) saturate(160%) url(#liquid-glass-filter);
-      -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(160%);
-      background: rgba(var(--lg-tint-color), var(--lg-tint-opacity));
-      border: 1px solid transparent;
-      background-clip: padding-box;
-      box-shadow:
-        0 8px var(--lg-outer-shadow-blur) rgba(0,0,0,0.12),
-        inset 0 1.5px 0 rgba(255,255,255,var(--lg-specular-opacity)),
-        inset 0 -1px 0 rgba(255,255,255,0.14),
-        inset 1.5px 0 rgba(255,255,255,0.22),
-        inset -1.5px 0 rgba(255,255,255,0.10),
-        inset 0 0 var(--lg-inner-shadow-blur) var(--lg-inner-shadow-spread) var(--lg-inner-shadow-color),
-        0 0 0 1px rgba(255,255,255,0.32);
       border-radius: var(--lg-radius);
       overflow: hidden;
       animation: lg-emerge 0.45s cubic-bezier(0.22,1,0.36,1) both;
     }
+
+    /* backdrop layer */
+    .lg-surface::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: inherit;
+      backdrop-filter: blur(var(--lg-blur)) saturate(180%) url(#liquid-glass-filter);
+      -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(180%);
+    }
+
+    /* tint + inner shadow + specular border layer */
     .lg-surface::before {
       content: '';
       position: absolute;
       inset: 0;
-      z-index: 0;
+      z-index: 1;
       border-radius: inherit;
       pointer-events: none;
-      background:
-        linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.70) 40%, rgba(255,255,255,0.22) 50%, transparent 60%),
-        linear-gradient(138deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.07) 38%, rgba(255,255,255,0.00) 60%, rgba(255,255,255,0.06) 100%);
-      background-size: 300% 100%, 100% 100%;
-      background-position: -200% center, 0 0;
-    }
-    .lg-surface::after {
-      content: '';
-      position: absolute;
-      inset: -1px;
-      z-index: -1;
-      border-radius: inherit;
-      pointer-events: none;
-      background:
-        radial-gradient(circle 80px at var(--lg-x,50%) var(--lg-y,0%), rgba(255,255,255,0.45), transparent 70%),
-        linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 30%, rgba(255,255,255,0.05) 60%, rgba(255,255,255,0.28) 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      padding: 1px;
-    }
-    .lg-surface > * { position: relative; z-index: 1; }
-
-    .lg-surface-dark {
-      background: rgba(10,16,32,0.36);
+      background-color: rgba(var(--lg-tint-color), var(--lg-tint-opacity));
       box-shadow:
-        0 12px 48px rgba(0,0,0,0.32),
-        inset 0 1.5px 0 rgba(255,255,255,0.22),
-        inset 0 -1px 0 rgba(0,0,0,0.20),
-        0 0 0 1px rgba(255,255,255,0.14);
+        inset 0 0 var(--lg-inner-shadow-blur) var(--lg-inner-shadow-spread) var(--lg-inner-shadow-color),
+        inset 0 1.5px 0 rgba(255,255,255,var(--lg-specular-opacity)),
+        inset 0 -1px 0 rgba(255,255,255,0.12),
+        inset 1.5px 0 rgba(255,255,255,0.20),
+        inset -1.5px 0 rgba(255,255,255,0.08),
+        0 0 0 0.5px rgba(255,255,255,0.28),
+        0 8px var(--lg-outer-shadow-blur) rgba(0,0,0,0.14);
+    }
+
+    .lg-surface > * { position: relative; z-index: 2; }
+
+    /* ── Dark variant ── */
+    .lg-surface-dark {
+      --lg-tint-color: 10, 16, 32;
+      --lg-tint-opacity: 0.38;
+      --lg-inner-shadow-color: rgba(255,255,255,0.14);
+      --lg-inner-shadow-blur: 16px;
+      --lg-inner-shadow-spread: -4px;
+      --lg-specular-opacity: 0.22;
     }
     .lg-surface-dark::before {
-      background:
-        linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.35) 40%, rgba(255,255,255,0.10) 50%, transparent 60%),
-        linear-gradient(138deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.00) 60%, rgba(255,255,255,0.04) 100%);
-      background-size: 300% 100%, 100% 100%;
-      background-position: -200% center, 0 0;
+      box-shadow:
+        inset 0 0 var(--lg-inner-shadow-blur) var(--lg-inner-shadow-spread) var(--lg-inner-shadow-color),
+        inset 0 1.5px 0 rgba(255,255,255,0.22),
+        inset 0 -1px 0 rgba(0,0,0,0.18),
+        0 0 0 0.5px rgba(255,255,255,0.12),
+        0 12px 48px rgba(0,0,0,0.32);
     }
 
+    /* ── Button interactions ── */
     .lg-button {
       cursor: pointer;
-      transition: transform 90ms cubic-bezier(0.34,1.56,0.64,1), box-shadow 120ms ease, background 120ms ease;
+      transition: transform 90ms cubic-bezier(0.34,1.56,0.64,1), filter 120ms ease;
       user-select: none;
     }
     .lg-button:hover {
-      background: rgba(255,255,255,0.26);
-      transform: translateY(-2px) scale(1.01);
-      box-shadow:
-        0 16px 48px rgba(0,0,0,0.18),
-        inset 0 2px 0 rgba(255,255,255,0.92),
-        inset 0 -1px 0 rgba(255,255,255,0.18),
-        0 0 0 1px rgba(255,255,255,0.48);
+      transform: translateY(-2px) scale(1.015);
+      filter: brightness(1.06);
     }
-    .lg-button-cta {
-      background: rgba(45,108,223,0.35);
-      box-shadow:
-        0 8px var(--lg-outer-shadow-blur) rgba(45,108,223,0.28),
-        inset 0 1.5px 0 rgba(255,255,255,0.72),
-        inset 0 -1px 0 rgba(45,108,223,0.22),
-        inset 1.5px 0 rgba(255,255,255,0.18),
-        inset -1.5px 0 rgba(255,255,255,0.10),
-        0 0 0 1px rgba(100,150,255,0.40);
+    .lg-button:hover::before {
+      --lg-specular-opacity: 1;
+      --lg-tint-opacity: 0.14;
     }
-    .lg-button-cta::before {
-      background:
-        linear-gradient(120deg, transparent 20%, rgba(180,215,255,0.80) 40%, rgba(180,215,255,0.25) 50%, transparent 60%),
-        linear-gradient(138deg, rgba(200,225,255,0.30) 0%, rgba(150,195,255,0.08) 38%, rgba(255,255,255,0.00) 60%, rgba(180,210,255,0.08) 100%);
-      background-size: 300% 100%, 100% 100%;
-      background-position: -200% center, 0 0;
+    .lg-button:active {
+      transform: translateY(0) scale(0.98);
     }
 
+    /* ── CTA button ── */
+    .lg-button-cta::after {
+      background: rgba(45,108,223,0.28) !important;
+      backdrop-filter: blur(var(--lg-blur)) saturate(180%) url(#liquid-glass-filter) !important;
+      -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(180%) !important;
+    }
+    .lg-button-cta::before {
+      background-color: rgba(45,108,223,0.32) !important;
+      box-shadow:
+        inset 0 0 20px -4px rgba(120,170,255,0.5),
+        inset 0 1.5px 0 rgba(180,215,255,0.9),
+        inset 0 -1px 0 rgba(45,108,223,0.20),
+        0 0 0 0.5px rgba(100,150,255,0.38),
+        0 8px 32px rgba(45,108,223,0.30) !important;
+    }
+
+    /* ── Sizing helpers ── */
     .lg-card { padding: 1.25rem; }
     .lg-panel { padding: 1.5rem; }
     .lg-input-wrapper {
@@ -213,6 +204,7 @@
       color: #1a1a2e;
       border: none;
       letter-spacing: 0.01em;
+      background: transparent;
     }
     button.glass-btn.dark-text { color: rgba(255,255,255,0.9); }
 
@@ -226,7 +218,7 @@
     .row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; justify-content: center; }
     .col { display: flex; flex-direction: column; gap: 16px; align-items: center; }
 
-    /* ── Section title (visible in screenshot) ── */
+    /* ── Section title ── */
     .screenshot-title {
       font-size: 13px;
       font-weight: 600;
@@ -254,32 +246,36 @@
     }
     .demo-grid .span-2 { grid-column: 1 / -1; }
 
-    /* Brand-theme overrides (inline via style attr on containers) */
+    /* ── Brand-theme overrides ── */
     .theme-green  { --lg-tint-color: 16, 185, 129;  --lg-outer-shadow-blur: 50px; }
     .theme-rose   { --lg-tint-color: 244, 63, 94;   --lg-outer-shadow-blur: 50px; }
     .theme-amber  { --lg-tint-color: 245, 158, 11;  --lg-outer-shadow-blur: 50px; }
 
-    .cta-green  { background: rgba(16,185,129,0.35)  !important; box-shadow: 0 8px 50px rgba(16,185,129,0.35), inset 0 1.5px 0 rgba(255,255,255,0.72), 0 0 0 1px rgba(16,185,129,0.4) !important; }
-    .cta-rose   { background: rgba(244,63,94,0.35)   !important; box-shadow: 0 8px 50px rgba(244,63,94,0.35),  inset 0 1.5px 0 rgba(255,255,255,0.72), 0 0 0 1px rgba(244,63,94,0.4)  !important; }
-    .cta-amber  { background: rgba(245,158,11,0.35)  !important; box-shadow: 0 8px 50px rgba(245,158,11,0.35), inset 0 1.5px 0 rgba(255,255,255,0.72), 0 0 0 1px rgba(245,158,11,0.4) !important; }
+    .cta-green::before  { background-color: rgba(16,185,129,0.32)  !important; box-shadow: inset 0 0 20px -4px rgba(16,185,129,0.5), inset 0 1.5px 0 rgba(255,255,255,0.85), 0 0 0 0.5px rgba(16,185,129,0.4), 0 8px 50px rgba(16,185,129,0.35) !important; }
+    .cta-rose::before   { background-color: rgba(244,63,94,0.32)   !important; box-shadow: inset 0 0 20px -4px rgba(244,63,94,0.5),  inset 0 1.5px 0 rgba(255,255,255,0.85), 0 0 0 0.5px rgba(244,63,94,0.4),  0 8px 50px rgba(244,63,94,0.35)  !important; }
+    .cta-amber::before  { background-color: rgba(245,158,11,0.32)  !important; box-shadow: inset 0 0 20px -4px rgba(245,158,11,0.5), inset 0 1.5px 0 rgba(255,255,255,0.85), 0 0 0 0.5px rgba(245,158,11,0.4), 0 8px 50px rgba(245,158,11,0.35) !important; }
   </style>
 </head>
 <body>
 
-<!-- SVG filter — powers the displacement refraction -->
-<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none">
-  <defs>
-    <filter id="liquid-glass-filter" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
-      <feTurbulence type="fractalNoise" baseFrequency="0.009 0.013" numOctaves="4" seed="8" stitchTiles="stitch" result="noise"/>
+<!-- SVG filter — physics-based displacement refraction -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none" xmlns="http://www.w3.org/2000/svg" color-interpolation-filters="sRGB">
+  <defs id="svg-defs">
+    <filter id="liquid-glass-filter" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.3" result="blurred" />
+      <feTurbulence type="fractalNoise" baseFrequency="0.006 0.009" numOctaves="4" seed="12" stitchTiles="stitch" result="noise"/>
       <feColorMatrix in="noise" type="saturate" values="0" result="grayNoise"/>
-      <feDisplacementMap in="SourceGraphic" in2="grayNoise" scale="22" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
-      <feGaussianBlur in="displaced" stdDeviation="0.4" result="softDisplaced"/>
-      <feColorMatrix in="softDisplaced" type="matrix"
-        values="1 0 0 0  0.06
-                0 1 0 0  0.08
-                0 0 1 0  0.12
-                0 0 0 28 -10" result="specularMask"/>
-      <feBlend in="softDisplaced" in2="specularMask" mode="screen" result="withSpecular"/>
+      <feDisplacementMap in="blurred" in2="grayNoise" scale="28" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+      <feColorMatrix in="displaced" type="saturate" values="4" result="displaced_sat" />
+      <feColorMatrix in="displaced_sat" type="matrix"
+        values="1 0 0 0  0.04
+                0 1 0 0  0.05
+                0 0 1 0  0.08
+                0 0 0 32 -12" result="specularMask"/>
+      <feComponentTransfer in="specularMask" result="spec_faded">
+        <feFuncA type="linear" slope="0.5" />
+      </feComponentTransfer>
+      <feBlend in="displaced_sat" in2="spec_faded" mode="screen" result="withSpecular"/>
       <feComposite in="withSpecular" in2="SourceGraphic" operator="in"/>
     </filter>
   </defs>
@@ -287,7 +283,6 @@
 
 <!-- ══════════════════════════════════════════════════════════════════
      SCREENSHOT 1 — Full demo (all components)
-     README: "Full demo — all components on a gradient/image background"
      ══════════════════════════════════════════════════════════════════ -->
 <section class="section bg-gradient-5" id="full-demo">
   <div class="section-label">screenshot 1 — full demo</div>
@@ -345,7 +340,6 @@
 
 <!-- ══════════════════════════════════════════════════════════════════
      SCREENSHOT 2 — Three button variants
-     README: "Three button variants side by side on a gradient background"
      ══════════════════════════════════════════════════════════════════ -->
 <section class="section bg-gradient-1" id="buttons">
   <div class="section-label">screenshot 2 — button variants</div>
@@ -370,7 +364,6 @@
 
 <!-- ══════════════════════════════════════════════════════════════════
      SCREENSHOT 3 — Card with content
-     README: "Card with content on a blurred/image background"
      ══════════════════════════════════════════════════════════════════ -->
 <section class="section bg-gradient-2" id="cards">
   <div class="section-label dark-label">screenshot 3 — cards</div>
@@ -396,13 +389,11 @@
 
 <!-- ══════════════════════════════════════════════════════════════════
      SCREENSHOT 4 — Search bar variants
-     README: "Search bar with icon, light and dark variants"
      ══════════════════════════════════════════════════════════════════ -->
 <section class="section bg-gradient-4" id="search">
   <div class="section-label">screenshot 4 — search bar</div>
 
   <div class="col" style="gap:20px; width:100%; max-width:360px;">
-    <!-- Light -->
     <div>
       <div class="lg-surface lg-input-wrapper" style="border-radius:var(--lg-radius);">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(0,0,0,0.55)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -413,7 +404,6 @@
       <div style="font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:0.08em;text-transform:uppercase;margin-top:8px;text-align:center">variant="light"</div>
     </div>
 
-    <!-- Dark -->
     <div>
       <div class="lg-surface lg-surface-dark lg-input-wrapper" style="border-radius:var(--lg-radius);">
         <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -430,7 +420,6 @@
 
 <!-- ══════════════════════════════════════════════════════════════════
      SCREENSHOT 5 — Brand-color themes
-     README: "Same component with 3 different brand-color themes side by side"
      ══════════════════════════════════════════════════════════════════ -->
 <section class="section bg-gradient-3" id="themes">
   <div class="section-label">screenshot 5 — brand themes</div>
@@ -445,7 +434,7 @@
           <p style="color:#065f46">Booking confirmed for Monday at 10 AM.</p>
         </div>
       </div>
-      <button class="lg-surface lg-button lg-button-cta glass-btn cta-green" style="color:rgba(220,255,240,0.95); --lg-tint-color:16,185,129;">Book Now</button>
+      <button class="lg-surface lg-button lg-button-cta glass-btn cta-green" style="color:rgba(220,255,240,0.95);">Book Now</button>
       <span style="color:rgba(255,255,255,0.45);font-size:11px;letter-spacing:0.08em;text-transform:uppercase">tintColor: emerald</span>
     </div>
 
@@ -457,7 +446,7 @@
           <p style="color:#9f1239">Your session starts in 5 minutes.</p>
         </div>
       </div>
-      <button class="lg-surface lg-button lg-button-cta glass-btn cta-rose" style="color:rgba(255,220,230,0.95); --lg-tint-color:244,63,94;">Join Session</button>
+      <button class="lg-surface lg-button lg-button-cta glass-btn cta-rose" style="color:rgba(255,220,230,0.95);">Join Session</button>
       <span style="color:rgba(255,255,255,0.45);font-size:11px;letter-spacing:0.08em;text-transform:uppercase">tintColor: rose</span>
     </div>
 
@@ -469,7 +458,7 @@
           <p style="color:#92400e">3 new notifications waiting for you.</p>
         </div>
       </div>
-      <button class="lg-surface lg-button lg-button-cta glass-btn cta-amber" style="color:rgba(255,245,215,0.95); --lg-tint-color:245,158,11;">View All</button>
+      <button class="lg-surface lg-button lg-button-cta glass-btn cta-amber" style="color:rgba(255,245,215,0.95);">View All</button>
       <span style="color:rgba(255,255,255,0.45);font-size:11px;letter-spacing:0.08em;text-transform:uppercase">tintColor: amber</span>
     </div>
 
